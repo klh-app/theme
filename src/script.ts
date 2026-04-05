@@ -1,0 +1,55 @@
+import { createElement } from "react";
+import {
+  DEFAULT_ATTRIBUTE,
+  DEFAULT_THEME,
+  MEDIA_QUERY,
+  STORAGE_KEY,
+} from "./constants.js";
+
+export interface ThemeScriptProps {
+  storageKey?: string;
+  defaultTheme?: string;
+  attribute?: string | string[];
+  value?: Record<string, string>;
+  enableSystem?: boolean;
+  nonce?: string;
+}
+
+/**
+ * Returns a self-executing JS string that prevents FOUC by
+ * reading the theme from localStorage and applying it to <html>
+ * before paint.
+ */
+export function getThemeScript(props?: ThemeScriptProps): string {
+  const {
+    storageKey = STORAGE_KEY,
+    defaultTheme = DEFAULT_THEME,
+    attribute = DEFAULT_ATTRIBUTE,
+    value,
+    enableSystem = true,
+  } = props ?? {};
+
+  const attributes = Array.isArray(attribute) ? attribute : [attribute];
+  const valueMap = value ? JSON.stringify(value) : "undefined";
+
+  // Build the inline script as a string
+  return `(function(){try{var d=document.documentElement;var k=${JSON.stringify(storageKey)};var df=${JSON.stringify(defaultTheme)};var attrs=${JSON.stringify(attributes)};var vm=${valueMap};var es=${JSON.stringify(enableSystem)};var t=localStorage.getItem(k)||df;if(t==='system'&&es){t=window.matchMedia(${JSON.stringify(MEDIA_QUERY)}).matches?'dark':'light';}var v=vm&&vm[t]?vm[t]:t;attrs.forEach(function(a){if(a==='class'){d.classList.add(v);}else{d.setAttribute(a,v);}});}catch(e){}})()`;
+}
+
+/**
+ * React component that renders a <script> tag with the FOUC prevention
+ * script using dangerouslySetInnerHTML.
+ */
+export function ThemeScript(props: ThemeScriptProps): React.ReactElement {
+  const {
+    nonce,
+    ...scriptProps
+  } = props;
+
+  return createElement("script", {
+    nonce,
+    dangerouslySetInnerHTML: {
+      __html: getThemeScript(scriptProps),
+    },
+  });
+}

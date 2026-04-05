@@ -1,0 +1,200 @@
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
+import type { ThemeContextValue, ThemeProviderProps } from "./types.js";
+import {
+  DEFAULT_ATTRIBUTE,
+  DEFAULT_THEME,
+  DEFAULT_THEMES,
+  STORAGE_KEY,
+  SYSTEM_THEME,
+} from "./constants.js";
+import { createLocalStorageAdapter } from "./storage.js";
+import { useSystemTheme } from "./use-system-theme.js";
+
+export const ThemeContext = createContext<ThemeContextValue | undefined>(
+  undefined,
+);
+
+const disableTransitionStyle =
+  "*, *::before, *::after { transition: none !important; }";
+
+function disableTransitions(nonce?: string): () => void {
+  if (typeof document === "undefined") return () => {};
+
+  const style = document.createElement("style");
+  if (nonce) style.setAttribute("nonce", nonce);
+  style.appendChild(document.createTextNode(disableTransitionStyle));
+  document.head.appendChild(style);
+
+  // Force reflow so the style takes effect synchronously
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  window.getComputedStyle(document.body);
+
+  return () => {
+    // Re-enable transitions after a frame
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        document.head.removeChild(style);
+      });
+    });
+  };
+}
+
+function applyTheme(
+  resolved: string,
+  attribute: string | string[],
+  valueMap: Record<string, string> | undefined,
+) {
+  if (typeof document === "undefined") return;
+
+  const d = document.documentElement;
+  const attrs = Array.isArray(attribute) ? attribute : [attribute];
+  const mapped = valueMap?.[resolved] ?? resolved;
+
+  for (const attr of attrs) {
+    if (attr === "class") {
+      // Remove any existing theme classes, then add the new one
+      d.classList.forEach((cls) => {
+        // Remove theme-related classes cautiously
+        d.classList.remove(cls);
+      });
+      d.classList.add(mapped);
+    } else {
+      d.setAttribute(attr, mapped);
+    }
+  }
+}
+
+export function ThemeProvider({
+  children,
+  defaultTheme = DEFAULT_THEME,
+  themes = DEFAULT_THEMES,
+  storageKey = STORAGE_KEY,
+  storage: storageProp,
+  attribute = DEFAULT_ATTRIBUTE,
+  value,
+  enableSystem = true,
+  disableTransitionOnChange = false,
+  nonce,
+}: ThemeProviderProps) {
+  // Create or reuse storage adapter
+  const storage = useMemo(
+    () => storageProp ?? createLocalStorageAdapter(storageKey),
+    [storageProp, storageKey],
+  );
+
+  // Subscribe to storage changes via useSyncExternalStore
+  const theme = useSyncExternalStore(
+    storage.subscribe,
+    () => storage.get() ?? defaultTheme,
+    () => defaultTheme,
+  );
+
+  const systemTheme = useSystemTheme();
+
+  // Resolve theme: if 'system' and enableSystem, use OS preference
+  const resolvedTheme = useMemo(() => {
+    if (theme === SYSTEM_THEME && enableSystem) {
+      return systemTheme ?? "light";
+    }
+    return theme;
+  }, [theme, enableSystem, systemTheme]);
+
+  // Expose themes list: include 'system' if enableSystem
+  const allThemes = useMemo(() => {
+    if (enableSystem && !themes.includes(SYSTEM_THEME)) {
+      return [...themes, SYSTEM_THEME];
+    }
+    return themes;
+  }, [themes, enableSystem]);
+
+  const setTheme = useCallback(
+    (themeOrUpdater: string | ((prev: string) => string)) => {
+      const newTheme =
+        typeof themeOrUpdater === "function"
+          ? themeOrUpdater(storage.get() ?? defaultTheme)
+          : themeOrUpdater;
+      storage.set(newTheme);
+
+      // Manually dispatch a custom event so same-tab listeners update
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("theme-change"));
+      }
+    },
+    [storage, defaultTheme],
+  );
+
+  // Also subscribe to our custom event for same-tab reactivity
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handler = () => {
+      // Force a re-render by triggering the subscribe callback indirectly.
+      // The storage.subscribe only listens to cross-tab events,
+      // so we need this custom event for same-tab updates.
+      // We'll use a trick: dispatch a storage event manually.
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: storageKey,
+        }),
+      );
+    };
+
+    window.addEventListener("theme-change", handler);
+    return () => window.removeEventListener("theme-change", handler);
+  }, [storageKey]);
+
+  // Apply theme to DOM
+  useEffect(() => {
+    let restore: (() => void) | undefined;
+    if (disableTransitionOnChange) {
+      restore = disableTransitions(nonce);
+    }
+
+    applyTheme(resolvedTheme, attribute, value);
+
+    return () => {
+      restore?.();
+    };
+  }, [resolvedTheme, attribute, value, disableTransitionOnChange, nonce]);
+
+  const contextValue = useMemo<ThemeContextValue>(
+    () => ({
+      theme,
+      resolvedTheme,
+      setTheme,
+      systemTheme,
+      themes: allThemes,
+      storage,
+      enableSystem,
+      defaultTheme,
+      attribute,
+      value,
+      disableTransitionOnChange,
+      nonce,
+    }),
+    [
+      theme,
+      resolvedTheme,
+      setTheme,
+      systemTheme,
+      allThemes,
+      storage,
+      enableSystem,
+      defaultTheme,
+      attribute,
+      value,
+      disableTransitionOnChange,
+      nonce,
+    ],
+  );
+
+  return (
+    <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>
+  );
+}
