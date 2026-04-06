@@ -1,24 +1,11 @@
 # @klh-app/theme
 
-React 18+ theme management built on `useSyncExternalStore`. Zero runtime dependencies.
-
-## Features
-
-- **`useSyncExternalStore`-first** — no `useState` + `useEffect` hacks for external state
-- **System preference detection** — reacts to OS-level `prefers-color-scheme` changes
-- **Cross-tab sync** — theme changes propagate across browser tabs via `StorageEvent`
-- **FOUC prevention** — inline script sets theme before first paint
-- **Custom storage** — pluggable `ThemeStorage` interface (localStorage adapter included)
-- **SSR safe** — all DOM/`window` access is guarded
-- **Zero runtime dependencies** — only `react >= 18` as peer dep
-- **TypeScript strict** — fully typed with declaration files
+React 18+ theme management built on `useSyncExternalStore`. Zero runtime dependencies. Framework-agnostic — works with Next.js, Vite, Remix, or any React setup.
 
 ## Install
 
 ```bash
 pnpm add @klh-app/theme
-# or
-npm install @klh-app/theme
 ```
 
 Peer dependencies: `react >= 18`, `react-dom >= 18`
@@ -31,14 +18,13 @@ import { ThemeProvider, useTheme } from "@klh-app/theme";
 function App() {
   return (
     <ThemeProvider>
-      <Page />
+      <ThemeToggle />
     </ThemeProvider>
   );
 }
 
-function Page() {
-  const { theme, resolvedTheme, setTheme } = useTheme();
-
+function ThemeToggle() {
+  const { resolvedTheme, setTheme } = useTheme();
   return (
     <button onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
       {resolvedTheme === "dark" ? "☀️" : "🌙"}
@@ -46,6 +32,18 @@ function Page() {
   );
 }
 ```
+
+## Why this over next-themes?
+
+| | `@klh-app/theme` | `next-themes` |
+|---|---|---|
+| **State primitive** | `useSyncExternalStore` — tear-free reads, no hydration mismatch | `useState` + `useEffect` — can flash wrong theme during concurrent renders |
+| **Framework** | Any React 18+ app (Vite, Remix, Astro, Next.js) | Next.js-first, others require workarounds |
+| **Storage** | Pluggable `ThemeStorage` interface — swap localStorage for cookies, IndexedDB, or anything | Hardcoded to localStorage |
+| **Dependencies** | Zero runtime deps | Zero runtime deps |
+| **Bundle** | ~2.1 KB gzipped | ~2.5 KB gzipped |
+
+If you're on Next.js and `next-themes` works for you, keep using it. This package exists for projects that need framework-agnostic design, pluggable storage, or correct concurrent rendering semantics.
 
 ## Preventing FOUC
 
@@ -71,17 +69,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-### Raw script string
+### Vite / SPA
 
-If you need the raw JS (e.g. for a non-React SSR pipeline):
+In a client-rendered app, FOUC isn't usually a problem since JavaScript runs before paint. But if you use SSR with Vite:
 
-```ts
+```tsx
+// entry-server.tsx
 import { getThemeScript } from "@klh-app/theme";
 
 const html = `
   <html>
     <head><script>${getThemeScript()}</script></head>
-    <body>...</body>
+    <body><div id="root"><!--app--></div></body>
   </html>
 `;
 ```
@@ -190,14 +189,14 @@ import type { ThemeStorage } from "@klh-app/theme";
 
 const cookieStorage: ThemeStorage = {
   get() {
-    // read from cookie
     return document.cookie.match(/theme=(\w+)/)?.[1] ?? null;
   },
   set(theme) {
     document.cookie = `theme=${theme};path=/;max-age=31536000`;
   },
   subscribe(callback) {
-    // poll, listen to custom events, etc.
+    // The subscribe contract: call `callback` whenever the value may have
+    // changed. For cookies you could poll, use a BroadcastChannel, etc.
     const id = setInterval(callback, 1000);
     return () => clearInterval(id);
   },
@@ -206,20 +205,27 @@ const cookieStorage: ThemeStorage = {
 <ThemeProvider storage={cookieStorage}>...</ThemeProvider>
 ```
 
+## Tailwind CSS
+
+Use the `class` attribute with Tailwind's `darkMode: "class"`:
+
+```tsx
+<ThemeProvider attribute="class">...</ThemeProvider>
+```
+
+This sets `<html class="dark">` which Tailwind's `dark:` variants key off of.
+
 ## Custom themes
 
 Beyond `"light"` and `"dark"`:
 
 ```tsx
-<ThemeProvider
-  themes={["light", "dark", "ocean", "forest"]}
-  defaultTheme="ocean"
->
+<ThemeProvider themes={["light", "dark", "ocean", "forest"]} defaultTheme="ocean">
   ...
 </ThemeProvider>
 ```
 
-Style with the attribute:
+Style with CSS:
 
 ```css
 [data-theme="ocean"] {
@@ -238,25 +244,12 @@ Style with the attribute:
 When your CSS classes or attribute values don't match theme names:
 
 ```tsx
-<ThemeProvider
-  attribute="class"
-  value={{ light: "theme-light", dark: "theme-dark" }}
->
+<ThemeProvider attribute="class" value={{ light: "theme-light", dark: "theme-dark" }}>
   ...
 </ThemeProvider>
 ```
 
 This sets `<html class="theme-dark">` instead of `<html class="dark">`.
-
-## Multiple attributes
-
-```tsx
-<ThemeProvider attribute={["data-theme", "data-mode"]}>
-  ...
-</ThemeProvider>
-```
-
-Sets both `data-theme="dark"` and `data-mode="dark"` on `<html>`.
 
 ## Disable transitions on change
 
@@ -266,7 +259,7 @@ Prevents a jarring flash of animated elements when switching themes:
 <ThemeProvider disableTransitionOnChange>...</ThemeProvider>
 ```
 
-This injects a temporary `<style>` tag that sets `transition: none !important` on all elements, then removes it after a double `requestAnimationFrame`.
+Injects a temporary `<style>` with `transition: none !important` on all elements, removes it after the browser paints with the new theme.
 
 ## Architecture
 
@@ -306,4 +299,4 @@ import type {
 
 ## License
 
-MIT
+[MIT](./LICENSE)
