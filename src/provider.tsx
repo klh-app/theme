@@ -31,12 +31,13 @@ function disableTransitions(nonce?: string): () => void {
   style.appendChild(document.createTextNode(disableTransitionStyle));
   document.head.appendChild(style);
 
-  // Force reflow so the style takes effect synchronously
-  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  window.getComputedStyle(document.body);
+  // Force reflow so the style takes effect synchronously.
+  // Must read a property — getComputedStyle() alone doesn't trigger recalc.
+  window.getComputedStyle(document.body).getPropertyValue("transition");
 
   return () => {
-    // Re-enable transitions after a frame
+    // Re-enable transitions after a double-rAF so the browser has
+    // painted with the new theme before transitions come back.
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
         document.head.removeChild(style);
@@ -49,6 +50,7 @@ function applyTheme(
   resolved: string,
   attribute: string | string[],
   valueMap: Record<string, string> | undefined,
+  themes: string[],
 ) {
   if (typeof document === "undefined") return;
 
@@ -58,11 +60,12 @@ function applyTheme(
 
   for (const attr of attrs) {
     if (attr === "class") {
-      // Remove any existing theme classes, then add the new one
-      d.classList.forEach((cls) => {
-        // Remove theme-related classes cautiously
-        d.classList.remove(cls);
-      });
+      // Only remove classes that correspond to known themes,
+      // leaving all other classes on <html> untouched.
+      const themeClasses = themes.map((t) => valueMap?.[t] ?? t);
+      for (const cls of themeClasses) {
+        if (cls) d.classList.remove(cls);
+      }
       d.classList.add(mapped);
     } else {
       d.setAttribute(attr, mapped);
@@ -88,7 +91,9 @@ export function ThemeProvider({
     [storageProp, storageKey],
   );
 
-  // Subscribe to storage changes via useSyncExternalStore
+  // Subscribe to storage changes via useSyncExternalStore.
+  // The storage adapter handles both same-tab and cross-tab notifications
+  // internally, so no custom event wiring is needed here.
   const theme = useSyncExternalStore(
     storage.subscribe,
     () => storage.get() ?? defaultTheme,
@@ -119,49 +124,26 @@ export function ThemeProvider({
         typeof themeOrUpdater === "function"
           ? themeOrUpdater(storage.get() ?? defaultTheme)
           : themeOrUpdater;
+      // storage.set() notifies subscribers directly (same-tab)
+      // and StorageEvent handles cross-tab sync
       storage.set(newTheme);
-
-      // Manually dispatch a custom event so same-tab listeners update
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("theme-change"));
-      }
     },
     [storage, defaultTheme],
   );
 
-  // Also subscribe to our custom event for same-tab reactivity
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const handler = () => {
-      // Force a re-render by triggering the subscribe callback indirectly.
-      // The storage.subscribe only listens to cross-tab events,
-      // so we need this custom event for same-tab updates.
-      // We'll use a trick: dispatch a storage event manually.
-      window.dispatchEvent(
-        new StorageEvent("storage", {
-          key: storageKey,
-        }),
-      );
-    };
-
-    window.addEventListener("theme-change", handler);
-    return () => window.removeEventListener("theme-change", handler);
-  }, [storageKey]);
-
   // Apply theme to DOM
   useEffect(() => {
-    let restore: (() => void) | undefined;
-    if (disableTransitionOnChange) {
-      restore = disableTransitions(nonce);
-    }
+    const restore = disableTransitionOnChange
+      ? disableTransitions(nonce)
+      : undefined;
 
-    applyTheme(resolvedTheme, attribute, value);
+    applyTheme(resolvedTheme, attribute, value, allThemes);
 
-    return () => {
-      restore?.();
-    };
-  }, [resolvedTheme, attribute, value, disableTransitionOnChange, nonce]);
+    // Re-enable transitions immediately after applying.
+    // The double-rAF inside restore() ensures the browser has painted
+    // with the new theme before transitions come back.
+    restore?.();
+  }, [resolvedTheme, attribute, value, disableTransitionOnChange, nonce, allThemes]);
 
   const contextValue = useMemo<ThemeContextValue>(
     () => ({

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { getThemeScript } from "../script.js";
 
 describe("getThemeScript", () => {
@@ -71,5 +71,135 @@ describe("getThemeScript", () => {
   it("sets attribute on document.documentElement", () => {
     const script = getThemeScript();
     expect(script).toContain("document.documentElement");
+  });
+
+  // --- Script evaluation tests ---
+
+  describe("evaluated output", () => {
+    let mockStorage: Record<string, string>;
+
+    beforeEach(() => {
+      mockStorage = {};
+      vi.stubGlobal("localStorage", {
+        getItem: vi.fn((key: string) => mockStorage[key] ?? null),
+        setItem: vi.fn((key: string, value: string) => {
+          mockStorage[key] = value;
+        }),
+      });
+      // Default: light preference
+      vi.stubGlobal(
+        "matchMedia",
+        vi.fn(() => ({ matches: false })),
+      );
+      document.documentElement.removeAttribute("data-theme");
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      document.documentElement.removeAttribute("data-theme");
+      document.documentElement.removeAttribute("data-mode");
+      document.documentElement.className = "";
+    });
+
+    it("sets data-theme from stored value", () => {
+      mockStorage["theme"] = "dark";
+      const script = getThemeScript();
+
+      // eslint-disable-next-line no-eval
+      eval(script);
+
+      expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+    });
+
+    it("falls back to defaultTheme when nothing is stored", () => {
+      const script = getThemeScript({ defaultTheme: "light" });
+
+      eval(script);
+
+      expect(document.documentElement.getAttribute("data-theme")).toBe("light");
+    });
+
+    it("resolves system theme to dark when OS prefers dark", () => {
+      vi.stubGlobal(
+        "matchMedia",
+        vi.fn(() => ({ matches: true })),
+      );
+
+      const script = getThemeScript({ defaultTheme: "system" });
+
+      eval(script);
+
+      expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+    });
+
+    it("resolves system theme to light when OS prefers light", () => {
+      vi.stubGlobal(
+        "matchMedia",
+        vi.fn(() => ({ matches: false })),
+      );
+
+      const script = getThemeScript({ defaultTheme: "system" });
+
+      eval(script);
+
+      expect(document.documentElement.getAttribute("data-theme")).toBe("light");
+    });
+
+    it("applies value mapping", () => {
+      mockStorage["theme"] = "dark";
+      const script = getThemeScript({
+        value: { dark: "theme-dark", light: "theme-light" },
+      });
+
+      eval(script);
+
+      expect(document.documentElement.getAttribute("data-theme")).toBe(
+        "theme-dark",
+      );
+    });
+
+    it("sets class attribute instead of data attribute", () => {
+      mockStorage["theme"] = "dark";
+      const script = getThemeScript({ attribute: "class" });
+
+      eval(script);
+
+      expect(document.documentElement.classList.contains("dark")).toBe(true);
+    });
+
+    it("sets multiple attributes", () => {
+      mockStorage["theme"] = "dark";
+      const script = getThemeScript({
+        attribute: ["data-theme", "data-mode"],
+      });
+
+      eval(script);
+
+      expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+      expect(document.documentElement.getAttribute("data-mode")).toBe("dark");
+    });
+
+    it("does not throw when localStorage is unavailable", () => {
+      vi.stubGlobal("localStorage", {
+        getItem: vi.fn(() => {
+          throw new Error("SecurityError");
+        }),
+      });
+      const script = getThemeScript();
+
+      expect(() => eval(script)).not.toThrow();
+    });
+
+    it("does not resolve system when enableSystem is false", () => {
+      const script = getThemeScript({
+        defaultTheme: "system",
+        enableSystem: false,
+      });
+
+      eval(script);
+
+      // Should set the literal string "system" rather than resolving
+      expect(document.documentElement.getAttribute("data-theme")).toBe("system");
+    });
   });
 });

@@ -1,4 +1,4 @@
-import { createElement } from "react";
+import { createElement, type ReactElement } from "react";
 import {
   DEFAULT_ATTRIBUTE,
   DEFAULT_THEME,
@@ -40,7 +40,7 @@ export function getThemeScript(props?: ThemeScriptProps): string {
  * React component that renders a <script> tag with the FOUC prevention
  * script using dangerouslySetInnerHTML.
  */
-export function ThemeScript(props: ThemeScriptProps): React.ReactElement {
+export function ThemeScript(props: ThemeScriptProps): ReactElement {
   const {
     nonce,
     ...scriptProps

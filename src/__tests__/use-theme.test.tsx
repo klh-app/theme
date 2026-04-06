@@ -42,11 +42,14 @@ describe("useTheme", () => {
 
     // Clear any existing attributes
     document.documentElement.removeAttribute("data-theme");
+    document.documentElement.className = "";
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
     document.documentElement.removeAttribute("data-theme");
+    document.documentElement.removeAttribute("data-mode");
+    document.documentElement.className = "";
   });
 
   it("throws when used outside ThemeProvider", () => {
@@ -215,5 +218,51 @@ describe("useTheme", () => {
     });
 
     expect(result.current.theme).toBe("dark");
+  });
+
+  describe("class attribute mode", () => {
+    it("adds theme as a class on <html>", () => {
+      renderHook(() => useTheme(), {
+        wrapper: createWrapper({ defaultTheme: "dark", attribute: "class" }),
+      });
+
+      expect(document.documentElement.classList.contains("dark")).toBe(true);
+    });
+
+    it("only removes theme classes, preserving other classes", () => {
+      // Add a non-theme class that should survive theme changes
+      document.documentElement.classList.add("custom-app-class");
+
+      const { result } = renderHook(() => useTheme(), {
+        wrapper: createWrapper({ defaultTheme: "light", attribute: "class" }),
+      });
+
+      // Should have both the theme class and the custom class
+      expect(document.documentElement.classList.contains("light")).toBe(true);
+      expect(document.documentElement.classList.contains("custom-app-class")).toBe(true);
+
+      // Switch theme
+      act(() => {
+        result.current.setTheme("dark");
+      });
+
+      // Old theme class removed, new one added, custom class preserved
+      expect(document.documentElement.classList.contains("dark")).toBe(true);
+      expect(document.documentElement.classList.contains("light")).toBe(false);
+      expect(document.documentElement.classList.contains("custom-app-class")).toBe(true);
+    });
+
+    it("handles class attribute with value mapping", () => {
+      renderHook(() => useTheme(), {
+        wrapper: createWrapper({
+          defaultTheme: "dark",
+          attribute: "class",
+          value: { dark: "theme-dark", light: "theme-light" },
+        }),
+      });
+
+      expect(document.documentElement.classList.contains("theme-dark")).toBe(true);
+      expect(document.documentElement.classList.contains("dark")).toBe(false);
+    });
   });
 });

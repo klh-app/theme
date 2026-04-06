@@ -1,8 +1,12 @@
 import { useSyncExternalStore } from "react";
 import { MEDIA_QUERY } from "./constants.js";
 
+function matchMediaSupported(): boolean {
+  return typeof window !== "undefined" && typeof window.matchMedia === "function";
+}
+
 function subscribeToSystemTheme(callback: () => void): () => void {
-  if (typeof window === "undefined") return () => {};
+  if (!matchMediaSupported()) return () => {};
 
   const mediaQuery = window.matchMedia(MEDIA_QUERY);
   mediaQuery.addEventListener("change", callback);
@@ -10,7 +14,7 @@ function subscribeToSystemTheme(callback: () => void): () => void {
 }
 
 function getSystemThemeSnapshot(): string {
-  if (typeof window === "undefined") return "light";
+  if (!matchMediaSupported()) return "light";
   return window.matchMedia(MEDIA_QUERY).matches ? "dark" : "light";
 }
 

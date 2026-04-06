@@ -71,6 +71,40 @@ describe("createLocalStorageAdapter", () => {
       const adapter = createLocalStorageAdapter("theme");
       expect(() => adapter.set("dark")).not.toThrow();
     });
+
+    it("notifies same-tab subscribers on set()", () => {
+      const adapter = createLocalStorageAdapter("theme");
+      const callback = vi.fn();
+
+      adapter.subscribe(callback);
+      adapter.set("dark");
+
+      expect(callback).toHaveBeenCalledOnce();
+    });
+
+    it("notifies multiple same-tab subscribers on set()", () => {
+      const adapter = createLocalStorageAdapter("theme");
+      const cb1 = vi.fn();
+      const cb2 = vi.fn();
+
+      adapter.subscribe(cb1);
+      adapter.subscribe(cb2);
+      adapter.set("dark");
+
+      expect(cb1).toHaveBeenCalledOnce();
+      expect(cb2).toHaveBeenCalledOnce();
+    });
+
+    it("does not notify unsubscribed same-tab listeners on set()", () => {
+      const adapter = createLocalStorageAdapter("theme");
+      const callback = vi.fn();
+
+      const unsub = adapter.subscribe(callback);
+      unsub();
+      adapter.set("dark");
+
+      expect(callback).not.toHaveBeenCalled();
+    });
   });
 
   describe("subscribe()", () => {
