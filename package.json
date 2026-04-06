@@ -1,6 +1,6 @@
 {
   "name": "@klh-app/theme",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "React 18+ theme management hook built on useSyncExternalStore",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -52,12 +52,21 @@
     "dark-mode",
     "light-mode",
     "useSyncExternalStore",
-    "hook"
+    "hook",
+    "system-preference",
+    "prefers-color-scheme",
+    "ssr",
+    "tailwind",
+    "css-variables"
   ],
   "author": "klh",
   "license": "MIT",
+  "homepage": "https://klh.app/theme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/klh-app/theme.git"
+    "url": "https://github.com/lazyskyline7/theme.git"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
