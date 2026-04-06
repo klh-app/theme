@@ -1,6 +1,24 @@
 # @klh-app/theme
 
+[![npm version](https://img.shields.io/npm/v/@klh-app/theme?color=blue)](https://www.npmjs.com/package/@klh-app/theme)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@klh-app/theme?label=size)](https://bundlephobia.com/package/@klh-app/theme)
+[![CI](https://github.com/klh-app/theme/actions/workflows/ci.yml/badge.svg)](https://github.com/klh-app/theme/actions/workflows/ci.yml)
+[![license](https://img.shields.io/npm/l/@klh-app/theme)](./LICENSE)
+
 React 18+ theme management built on `useSyncExternalStore`. Zero runtime dependencies. Framework-agnostic — works with Next.js, Vite, Remix, or any React setup.
+
+## Features
+
+- **`useSyncExternalStore`-first** — tear-free concurrent reads, no hydration mismatch hacks
+- **Framework-agnostic** — Vite, Remix, Astro, Next.js, or plain CRA
+- **System preference detection** — reacts to OS-level `prefers-color-scheme` changes in real-time
+- **Cross-tab sync** — theme changes propagate across browser tabs automatically
+- **FOUC prevention** — inline script sets theme before first paint
+- **Pluggable storage** — `ThemeStorage` interface for localStorage, cookies, IndexedDB, or anything
+- **Tailwind-ready** — `attribute="class"` just works with `darkMode: "class"`
+- **SSR safe** — all DOM/`window` access is guarded, `getServerSnapshot` provided
+- **Zero runtime dependencies** — only `react >= 18` as peer dep
+- **~2 KB gzipped**
 
 ## Install
 
