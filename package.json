@@ -64,7 +64,7 @@
   "homepage": "https://klh.app/theme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lazyskyline7/theme.git"
+    "url": "https://github.com/klh-app/theme.git"
   },
   "engines": {
     "node": ">=18"
