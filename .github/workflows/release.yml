@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - v*
 
 permissions:
   contents: write
@@ -12,34 +14,45 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
         with:
-          # This should match your project type (node for JS/TS)
           release-type: node
 
-      # After release-please creates a tag (on merge of its PR), we publish to npm
-      - name: Setup pnpm and node
-        if: ${{ steps.release.outputs.release_created }}
+  publish:
+    runs-on: ubuntu-latest
+    # This job runs if:
+    # 1. release-please just created a new release
+    # 2. OR you manually pushed a tag starting with 'v'
+    if: ${{ needs.release-please.outputs.release_created || startsWith(github.ref, 'refs/tags/v') }}
+    needs: [release-please]
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
 
       - name: Setup Node.js
-        if: ${{ steps.release.outputs.release_created }}
         uses: actions/setup-node@v4
         with:
           node-version: 18
           registry-url: 'https://registry.npmjs.org'
+          # Removed cache to ensure it's robust
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
 
       - name: Publish to npm
-        if: ${{ steps.release.outputs.release_created }}
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm build
-          pnpm publish --access public --no-git-checks
+        run: pnpm publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  # Note: You still need to add NPM_TOKEN as a secret in your GitHub repo!
