@@ -1,8 +1,7 @@
 # @klh-app/theme
 
 [![npm version](https://img.shields.io/npm/v/@klh-app/theme?color=blue)](https://www.npmjs.com/package/@klh-app/theme)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@klh-app/theme?label=size)](https://bundlephobia.com/package/@klh-app/theme)
-[![CI](https://github.com/klh-app/theme/actions/workflows/ci.yml/badge.svg)](https://github.com/klh-app/theme/actions/workflows/ci.yml)
+[![bundle size](https://img.shields.io/bundlejs/size/@klh-app/theme?label=size)](https://bundlejs.com/?q=@klh-app/theme)
 [![license](https://img.shields.io/npm/l/@klh-app/theme)](./LICENSE)
 
 React 18+ theme management built on `useSyncExternalStore`. Zero runtime dependencies. Framework-agnostic — works with Next.js, Vite, Remix, or any React setup.

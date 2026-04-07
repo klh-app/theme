@@ -8,5 +8,6 @@ export default defineConfig({
   sourcemap: false,
   clean: true,
   treeshake: true,
+  minify: true,
   external: ["react", "react-dom"],
 });
