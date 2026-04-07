@@ -33,24 +33,24 @@ export interface ThemeProviderProps {
   nonce?: string;
 }
 
-export interface UseThemeReturn {
+export interface UseThemeReturn<T extends string = "light" | "dark" | "system"> {
   /** User's selected theme (e.g. 'light', 'dark', 'system', or custom). */
-  theme: string;
+  theme: T | (string & {});
   /** The resolved theme actually applied to the DOM. */
-  resolvedTheme: string;
+  resolvedTheme: T | Extract<T, "light" | "dark"> | (string & {});
   /** Set a new theme. Accepts a value or an updater function. */
-  setTheme: (theme: string | ((prev: string) => string)) => void;
+  setTheme: (theme: T | (string & {}) | ((prev: T | (string & {})) => T | (string & {}))) => void;
   /** Current OS color scheme preference. */
-  systemTheme: string | undefined;
+  systemTheme: "light" | "dark" | undefined;
   /** List of available themes. */
-  themes: string[];
+  themes: T[] | (string & {})[];
 }
 
 export interface ThemeContextValue {
   theme: string;
   resolvedTheme: string;
   setTheme: (theme: string | ((prev: string) => string)) => void;
-  systemTheme: string | undefined;
+  systemTheme: "light" | "dark" | undefined;
   themes: string[];
   storage: ThemeStorage;
   enableSystem: boolean;

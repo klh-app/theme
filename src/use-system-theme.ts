@@ -13,7 +13,7 @@ function subscribeToSystemTheme(callback: () => void): () => void {
   return () => mediaQuery.removeEventListener("change", callback);
 }
 
-function getSystemThemeSnapshot(): string {
+function getSystemThemeSnapshot(): "light" | "dark" {
   if (!matchMediaSupported()) return "light";
   return window.matchMedia(MEDIA_QUERY).matches ? "dark" : "light";
 }
@@ -28,7 +28,7 @@ function getServerSnapshot(): undefined {
  *
  * @returns 'dark' | 'light' | undefined (undefined on server)
  */
-export function useSystemTheme(): string | undefined {
+export function useSystemTheme(): "light" | "dark" | undefined {
   return useSyncExternalStore(
     subscribeToSystemTheme,
     getSystemThemeSnapshot,
