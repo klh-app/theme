@@ -5,37 +5,42 @@ on:
     branches:
       - main
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
-  release:
-    name: Release
+  release-please:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          # This should match your project type (node for JS/TS)
+          release-type: node
 
-      - name: Setup pnpm
+      # After release-please creates a tag (on merge of its PR), we publish to npm
+      - name: Setup pnpm and node
+        if: ${{ steps.release.outputs.release_created }}
         uses: pnpm/action-setup@v4
         with:
           version: 10
 
       - name: Setup Node.js
+        if: ${{ steps.release.outputs.release_created }}
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          registry-url: 'https://registry.npmjs.org'
           cache: pnpm
 
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Create Release Pull Request or Publish to npm
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          # This expects you to have created an NPM_TOKEN secret in your repo settings.
-          # You also need to authorize the GITHUB_TOKEN to write to the repo.
-          publish: pnpm changeset publish
+      - name: Publish to npm
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+          pnpm publish --access public --no-git-checks
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # Note: You still need to add NPM_TOKEN as a secret in your GitHub repo!
