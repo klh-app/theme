@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.0 (2026-04-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* initial stable 1.0.0 release
+
+### Features
+
+* initial stable 1.0.0 release ([bf0d910](https://github.com/klh-app/theme/commit/bf0d91027435e7acb50f93757523706ffbb0e964))
+* setup Changesets for automated versioning and npm releases ([e2710cd](https://github.com/klh-app/theme/commit/e2710cd61b4d4795900e64386750e761d4ad8ce3))
+* switch to release-please for fully automated CI/CD and npm releases ([8c62079](https://github.com/klh-app/theme/commit/8c620797f5bab372c04b31c7dab39e3bb0e7fcce))
+* **theme:** add 'use client' directive and post-build script for Next.js support ([3254b31](https://github.com/klh-app/theme/commit/3254b319c307e3b4f805c2db5857ef4000f7e497))
+* **theme:** add color-scheme support for native UI elements ([cf1c56c](https://github.com/klh-app/theme/commit/cf1c56ce2b4c947c114a2669a794aa7ad2136b25))
+* **theme:** add generic type support to useTheme hook for better autocomplete ([6f3cb4c](https://github.com/klh-app/theme/commit/6f3cb4c6c07caf237e0f35625b91352e07b5cf48))
+
+
+### Bug Fixes
+
+* address code review — 8 issues across architecture, correctness, and tests ([1c472e0](https://github.com/klh-app/theme/commit/1c472e0bacf8be70782b5e06624fe5d8a8474c69))
+* prevent xss in fouc script via safe json stringify ([2468716](https://github.com/klh-app/theme/commit/2468716e55ef450b79de90ba7d1ae4a03088cc86))
+
 ## [0.1.1] - 2026-04-06
 
 ### Fixed
