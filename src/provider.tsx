@@ -31,9 +31,9 @@ function disableTransitions(nonce?: string): () => void {
   style.appendChild(document.createTextNode(disableTransitionStyle));
   document.head.appendChild(style);
 
-  // Force reflow so the style takes effect synchronously.
-  // Must read a property — getComputedStyle() alone doesn't trigger recalc.
-  window.getComputedStyle(document.body).getPropertyValue("transition");
+  // Force a synchronous layout calculation (reflow) so the disabled transitions take effect immediately.
+  // This avoids slower string-based style recalculations.
+  void document.documentElement.offsetHeight;
 
   return () => {
     // Re-enable transitions after a double-rAF so the browser has
