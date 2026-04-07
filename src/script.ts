@@ -30,10 +30,14 @@ export function getThemeScript(props?: ThemeScriptProps): string {
   } = props ?? {};
 
   const attributes = Array.isArray(attribute) ? attribute : [attribute];
-  const valueMap = value ? JSON.stringify(value) : "undefined";
+  
+  // Safe stringify to prevent XSS via premature script tag closure
+  const safeJsonStringify = (val: unknown) => JSON.stringify(val).replace(/</g, '\\u003c');
+  
+  const valueMap = value ? safeJsonStringify(value) : "undefined";
 
   // Build the inline script as a string
-  return `(function(){try{var d=document.documentElement;var k=${JSON.stringify(storageKey)};var df=${JSON.stringify(defaultTheme)};var attrs=${JSON.stringify(attributes)};var vm=${valueMap};var es=${JSON.stringify(enableSystem)};var t=localStorage.getItem(k)||df;if(t==='system'&&es){t=window.matchMedia(${JSON.stringify(MEDIA_QUERY)}).matches?'dark':'light';}var v=vm&&vm[t]?vm[t]:t;attrs.forEach(function(a){if(a==='class'){d.classList.add(v);}else{d.setAttribute(a,v);}});}catch(e){}})()`;
+  return `(function(){try{var d=document.documentElement;var k=${safeJsonStringify(storageKey)};var df=${safeJsonStringify(defaultTheme)};var attrs=${safeJsonStringify(attributes)};var vm=${valueMap};var es=${JSON.stringify(enableSystem)};var t=localStorage.getItem(k)||df;if(t==='system'&&es){t=window.matchMedia(${JSON.stringify(MEDIA_QUERY)}).matches?'dark':'light';}var v=vm&&vm[t]?vm[t]:t;attrs.forEach(function(a){if(a==='class'){d.classList.add(v);}else{d.setAttribute(a,v);}});}catch(e){}})()`;
 }
 
 /**
