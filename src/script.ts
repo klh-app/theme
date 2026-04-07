@@ -12,6 +12,7 @@ export interface ThemeScriptProps {
   attribute?: string | string[];
   value?: Record<string, string>;
   enableSystem?: boolean;
+  enableColorScheme?: boolean;
   nonce?: string;
 }
 
@@ -27,6 +28,7 @@ export function getThemeScript(props?: ThemeScriptProps): string {
     attribute = DEFAULT_ATTRIBUTE,
     value,
     enableSystem = true,
+    enableColorScheme = true,
   } = props ?? {};
 
   const attributes = Array.isArray(attribute) ? attribute : [attribute];
@@ -37,7 +39,7 @@ export function getThemeScript(props?: ThemeScriptProps): string {
   const valueMap = value ? safeJsonStringify(value) : "undefined";
 
   // Build the inline script as a string
-  return `(function(){try{var d=document.documentElement;var k=${safeJsonStringify(storageKey)};var df=${safeJsonStringify(defaultTheme)};var attrs=${safeJsonStringify(attributes)};var vm=${valueMap};var es=${JSON.stringify(enableSystem)};var t=localStorage.getItem(k)||df;if(t==='system'&&es){t=window.matchMedia(${JSON.stringify(MEDIA_QUERY)}).matches?'dark':'light';}var v=vm&&vm[t]?vm[t]:t;attrs.forEach(function(a){if(a==='class'){d.classList.add(v);}else{d.setAttribute(a,v);}});}catch(e){}})()`;
+  return `(function(){try{var d=document.documentElement;var k=${safeJsonStringify(storageKey)};var df=${safeJsonStringify(defaultTheme)};var attrs=${safeJsonStringify(attributes)};var vm=${valueMap};var es=${JSON.stringify(enableSystem)};var ecs=${JSON.stringify(enableColorScheme)};var t=localStorage.getItem(k)||df;if(t==='system'&&es){t=window.matchMedia(${JSON.stringify(MEDIA_QUERY)}).matches?'dark':'light';}var v=vm&&vm[t]?vm[t]:t;attrs.forEach(function(a){if(a==='class'){d.classList.add(v);}else{d.setAttribute(a,v);}});if(ecs){d.style.colorScheme=(t==='light'||t==='dark')?t:'';}}catch(e){}})()`;
 }
 
 /**

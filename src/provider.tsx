@@ -51,6 +51,7 @@ function applyTheme(
   attribute: string | string[],
   valueMap: Record<string, string> | undefined,
   themes: string[],
+  enableColorScheme: boolean,
 ) {
   if (typeof document === "undefined") return;
 
@@ -71,6 +72,11 @@ function applyTheme(
       d.setAttribute(attr, mapped);
     }
   }
+
+  if (enableColorScheme) {
+    const isStandard = ["light", "dark"].includes(resolved);
+    d.style.colorScheme = isStandard ? resolved : "";
+  }
 }
 
 export function ThemeProvider({
@@ -82,6 +88,7 @@ export function ThemeProvider({
   attribute = DEFAULT_ATTRIBUTE,
   value,
   enableSystem = true,
+  enableColorScheme = true,
   disableTransitionOnChange = false,
   nonce,
 }: ThemeProviderProps) {
@@ -137,13 +144,13 @@ export function ThemeProvider({
       ? disableTransitions(nonce)
       : undefined;
 
-    applyTheme(resolvedTheme, attribute, value, allThemes);
+    applyTheme(resolvedTheme, attribute, value, allThemes, enableColorScheme);
 
     // Re-enable transitions immediately after applying.
     // The double-rAF inside restore() ensures the browser has painted
     // with the new theme before transitions come back.
     restore?.();
-  }, [resolvedTheme, attribute, value, disableTransitionOnChange, nonce, allThemes]);
+  }, [resolvedTheme, attribute, value, disableTransitionOnChange, nonce, allThemes, enableColorScheme]);
 
   const contextValue = useMemo<ThemeContextValue>(
     () => ({
@@ -154,6 +161,7 @@ export function ThemeProvider({
       themes: allThemes,
       storage,
       enableSystem,
+      enableColorScheme,
       defaultTheme,
       attribute,
       value,
@@ -168,6 +176,7 @@ export function ThemeProvider({
       allThemes,
       storage,
       enableSystem,
+      enableColorScheme,
       defaultTheme,
       attribute,
       value,

@@ -25,6 +25,8 @@ export interface ThemeProviderProps {
   value?: Record<string, string>;
   /** Enable system theme detection. @default true */
   enableSystem?: boolean;
+  /** Enable color-scheme attribute on documentElement. @default true */
+  enableColorScheme?: boolean;
   /** Disable CSS transitions during theme change. @default false */
   disableTransitionOnChange?: boolean;
   /** Nonce for inline script CSP. */
@@ -52,6 +54,7 @@ export interface ThemeContextValue {
   themes: string[];
   storage: ThemeStorage;
   enableSystem: boolean;
+  enableColorScheme: boolean;
   defaultTheme: string;
   attribute: string | string[];
   value: Record<string, string> | undefined;
