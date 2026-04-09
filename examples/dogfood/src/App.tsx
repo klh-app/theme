@@ -1,11 +1,11 @@
-import { useTheme } from "@klh-app/theme";
+import { useTheme } from "@klh-app/use-theme";
 
 function App() {
   const { theme, resolvedTheme, setTheme, systemTheme, themes } = useTheme();
 
   return (
     <div className="container">
-      <h1>@klh-app/theme dogfood</h1>
+      <h1>@klh-app/use-theme dogfood</h1>
 
       <div className="card">
         <h2>Current state</h2>

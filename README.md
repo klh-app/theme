@@ -1,8 +1,8 @@
-# @klh-app/theme
+# @klh-app/use-theme
 
-[![npm version](https://img.shields.io/npm/v/@klh-app/theme?color=blue)](https://www.npmjs.com/package/@klh-app/theme)
-[![bundle size](https://img.shields.io/bundlejs/size/@klh-app/theme?label=size)](https://bundlejs.com/?q=@klh-app/theme)
-[![license](https://img.shields.io/npm/l/@klh-app/theme)](./LICENSE)
+[![npm version](https://img.shields.io/npm/v/@klh-app/use-theme?color=blue)](https://www.npmjs.com/package/@klh-app/use-theme)
+[![npm downloads](https://img.shields.io/npm/dm/@klh-app/use-theme)](https://www.npmjs.com/package/@klh-app/use-theme)
+[![license](https://img.shields.io/npm/l/@klh-app/use-theme)](./LICENSE)
 
 React 18+ theme management built on `useSyncExternalStore`. Zero runtime dependencies. Framework-agnostic — works with Next.js, Vite, Remix, or any React setup.
 
@@ -22,7 +22,7 @@ React 18+ theme management built on `useSyncExternalStore`. Zero runtime depende
 ## Install
 
 ```bash
-pnpm add @klh-app/theme
+pnpm add @klh-app/use-theme
 ```
 
 Peer dependencies: `react >= 18`, `react-dom >= 18`
@@ -30,7 +30,7 @@ Peer dependencies: `react >= 18`, `react-dom >= 18`
 ## Quick start
 
 ```tsx
-import { ThemeProvider, useTheme } from "@klh-app/theme";
+import { ThemeProvider, useTheme } from "@klh-app/use-theme";
 
 function App() {
   return (
@@ -52,7 +52,7 @@ function ThemeToggle() {
 
 ## Why this over next-themes?
 
-| | `@klh-app/theme` | `next-themes` |
+| | `@klh-app/use-theme` | `next-themes` |
 |---|---|---|
 | **State primitive** | `useSyncExternalStore` — tear-free reads, no hydration mismatch | `useState` + `useEffect` — can flash wrong theme during concurrent renders |
 | **Framework** | Any React 18+ app (Vite, Remix, Astro, Next.js) | Next.js-first, others require workarounds |
@@ -70,7 +70,7 @@ Without an inline script, server-rendered pages flash the default theme before h
 
 ```tsx
 // app/layout.tsx
-import { ThemeProvider, ThemeScript } from "@klh-app/theme";
+import { ThemeProvider, ThemeScript } from "@klh-app/use-theme";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -92,7 +92,7 @@ In a client-rendered app, FOUC isn't usually a problem since JavaScript runs bef
 
 ```tsx
 // entry-server.tsx
-import { getThemeScript } from "@klh-app/theme";
+import { getThemeScript } from "@klh-app/use-theme";
 
 const html = `
   <html>
@@ -160,7 +160,7 @@ const { theme, resolvedTheme, setTheme, systemTheme, themes } = useTheme();
 Standalone hook for OS color scheme detection, independent of `ThemeProvider`.
 
 ```ts
-import { useSystemTheme } from "@klh-app/theme";
+import { useSystemTheme } from "@klh-app/use-theme";
 
 const systemTheme = useSystemTheme(); // "light" | "dark" | undefined
 ```
@@ -192,7 +192,7 @@ React component wrapper around `getThemeScript`. Renders `<script dangerouslySet
 Factory for the built-in localStorage-backed `ThemeStorage`.
 
 ```ts
-import { createLocalStorageAdapter } from "@klh-app/theme";
+import { createLocalStorageAdapter } from "@klh-app/use-theme";
 
 const storage = createLocalStorageAdapter("my-app-theme");
 ```
@@ -202,7 +202,7 @@ const storage = createLocalStorageAdapter("my-app-theme");
 Implement the `ThemeStorage` interface to use any backend:
 
 ```ts
-import type { ThemeStorage } from "@klh-app/theme";
+import type { ThemeStorage } from "@klh-app/use-theme";
 
 const cookieStorage: ThemeStorage = {
   get() {
@@ -311,7 +311,7 @@ import type {
   ThemeProviderProps,
   UseThemeReturn,
   ThemeScriptProps,
-} from "@klh-app/theme";
+} from "@klh-app/use-theme";
 ```
 
 ## License

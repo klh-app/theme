@@ -1,5 +1,5 @@
 {
-  "name": "@klh-app/theme",
+  "name": "@klh-app/use-theme",
   "version": "1.0.2",
   "description": "React 18+ theme management hook built on useSyncExternalStore",
   "type": "module",
@@ -62,10 +62,13 @@
   ],
   "author": "klh",
   "license": "MIT",
-  "homepage": "https://klh.app/theme",
+  "homepage": "https://github.com/klh-app/use-theme#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/klh-app/theme.git"
+    "url": "https://github.com/klh-app/use-theme.git"
+  },
+  "bugs": {
+    "url": "https://github.com/klh-app/use-theme/issues"
   },
   "engines": {
     "node": ">=20.12.0"
