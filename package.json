@@ -62,7 +62,7 @@
   ],
   "author": "klh",
   "license": "MIT",
-  "homepage": "https://klh.app/theme",
+  "homepage": "https://www.npmjs.com/package/@klh-app/theme",
   "repository": {
     "type": "git",
     "url": "https://github.com/klh-app/theme.git"
