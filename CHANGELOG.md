@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2](https://github.com/klh-app/theme/compare/v1.0.1...v1.0.2) (2026-04-09)
+
+
+### Bug Fixes
+
+* add GitHub Packages dual publish and sync engine config ([a609de6](https://github.com/klh-app/theme/commit/a609de6c3823900f04cafe1751ab56f870f41b41))
+* remove explicit pnpm version from ci.yml ([db5ad11](https://github.com/klh-app/theme/commit/db5ad11956f54d8608610e1322740559d7e03a12))
+* remove explicit pnpm version to use packageManager field ([bd1e8cf](https://github.com/klh-app/theme/commit/bd1e8cf24162ce4a82bf69d7c532992e4b2b55a0))
+
 ## [1.0.1](https://github.com/klh-app/theme/compare/v1.0.0...v1.0.1) (2026-04-07)
 
 
