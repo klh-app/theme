@@ -10,6 +10,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  packages: write
 
 jobs:
   release:
@@ -29,8 +30,6 @@ jobs:
       - name: Setup pnpm
         if: ${{ steps.release.outputs.release_created || startsWith(github.ref, 'refs/tags/v') }}
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Setup Node.js
         if: ${{ steps.release.outputs.release_created || startsWith(github.ref, 'refs/tags/v') }}
@@ -52,3 +51,17 @@ jobs:
         run: pnpm publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Setup Node.js for GitHub Packages
+        if: ${{ steps.release.outputs.release_created || startsWith(github.ref, 'refs/tags/v') }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@klh-app'
+
+      - name: Publish to GitHub Packages
+        if: ${{ steps.release.outputs.release_created || startsWith(github.ref, 'refs/tags/v') }}
+        run: pnpm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
