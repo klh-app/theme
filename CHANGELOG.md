@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3](https://github.com/klh-app/use-theme/compare/v1.0.2...v1.0.3) (2026-04-09)
+
+
+### Bug Fixes
+
+* optimize logo and exclude assets from npm tarball ([a01c8d4](https://github.com/klh-app/use-theme/commit/a01c8d408ce5556fae0ec6ab750cc9312a9d5dc2))
+
 ## [1.0.2](https://github.com/klh-app/theme/compare/v1.0.1...v1.0.2) (2026-04-09)
 
 
