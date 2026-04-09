@@ -1,6 +1,6 @@
 {
   "name": "@klh-app/theme",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "React 18+ theme management hook built on useSyncExternalStore",
   "type": "module",
   "main": "./dist/index.cjs",
