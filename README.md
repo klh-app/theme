@@ -1,10 +1,16 @@
-# @klh-app/use-theme
+<p align="center">
+  <img src="assets/logo.png" width="120" alt="use-theme logo" />
+</p>
 
-[![npm version](https://img.shields.io/npm/v/@klh-app/use-theme?color=blue)](https://www.npmjs.com/package/@klh-app/use-theme)
-[![npm downloads](https://img.shields.io/npm/dm/@klh-app/use-theme)](https://www.npmjs.com/package/@klh-app/use-theme)
-[![license](https://img.shields.io/npm/l/@klh-app/use-theme)](./LICENSE)
+<h1 align="center">@klh-app/use-theme</h1>
 
-React 18+ theme management built on `useSyncExternalStore`. Zero runtime dependencies. Framework-agnostic — works with Next.js, Vite, Remix, or any React setup.
+<p align="center">
+  <a href="https://www.npmjs.com/package/@klh-app/use-theme"><img src="https://img.shields.io/npm/v/@klh-app/use-theme?color=blue" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/@klh-app/use-theme"><img src="https://img.shields.io/npm/dm/@klh-app/use-theme" alt="npm downloads" /></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/npm/l/@klh-app/use-theme" alt="license" /></a>
+</p>
+
+Dark mode for any React app. Built on `useSyncExternalStore` — zero runtime dependencies, framework-agnostic, works with Next.js, Vite, Remix, or any React 18+ setup.
 
 ## Features
 
