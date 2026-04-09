@@ -20,8 +20,7 @@
   },
   "sideEffects": false,
   "files": [
-    "dist",
-    "assets"
+    "dist"
   ],
   "scripts": {
     "build": "tsup && node scripts/add-use-client.mjs",

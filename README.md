@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.png" width="120" alt="use-theme logo" />
+  <img src="https://raw.githubusercontent.com/klh-app/use-theme/main/assets/logo.png" width="120" alt="use-theme logo" />
 </p>
 
 <h1 align="center">@klh-app/use-theme</h1>
